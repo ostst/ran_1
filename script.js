@@ -20,6 +20,7 @@
     });
   }
 
+  /* Scroll reveal */
   const revealEls = document.querySelectorAll(".js-reveal");
   if (revealEls.length && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
     const io = new IntersectionObserver(
@@ -38,37 +39,28 @@
     revealEls.forEach((el) => el.classList.add("is-visible"));
   }
 
-  /* Testimonials horizontal scroll */
-  const track = document.getElementById("testimonials-track");
-  const prev = document.getElementById("testi-prev");
-  const next = document.getElementById("testi-next");
+  /* Spotlight hover on pillar cards */
+  document.querySelectorAll(".pillar").forEach((card) => {
+    card.addEventListener("pointermove", (e) => {
+      const r = card.getBoundingClientRect();
+      card.style.setProperty("--mx", `${e.clientX - r.left}px`);
+      card.style.setProperty("--my", `${e.clientY - r.top}px`);
+    });
+  });
 
-  function scrollTestimonials(dir) {
-    if (!track) return;
-    const card = track.querySelector(".testimonial-card");
-    const delta = card ? card.offsetWidth + 18 : 320;
-    track.scrollBy({ left: dir * delta, behavior: "smooth" });
-  }
-
-  prev?.addEventListener("click", () => scrollTestimonials(-1));
-  next?.addEventListener("click", () => scrollTestimonials(1));
-
-  function inputForError(errorId) {
-    if (errorId === "consent-error") return document.getElementById("consent");
-    const err = document.getElementById(errorId);
-    let el = err?.previousElementSibling;
-    while (el && el.nodeType === 1 && !["INPUT", "TEXTAREA", "SELECT"].includes(el.tagName)) {
-      el = el.previousElementSibling;
-    }
-    return el;
-  }
+  const form = document.getElementById("application-form");
+  const statusEl = document.getElementById("form-status");
 
   function setError(id, message) {
     const err = document.getElementById(id);
-    const input = inputForError(id);
+    const input = err?.previousElementSibling;
     if (err) err.textContent = message || "";
     if (input && input.classList) {
       input.classList.toggle("invalid", Boolean(message));
+    }
+    if (id === "consent-error") {
+      const cb = document.getElementById("consent");
+      if (cb) cb.classList.toggle("invalid", Boolean(message));
     }
   }
 
@@ -80,9 +72,6 @@
     const digits = v.replace(/\D/g, "");
     return digits.length >= 10;
   }
-
-  const form = document.getElementById("application-form");
-  const statusEl = document.getElementById("form-status");
 
   if (form) {
     form.addEventListener("submit", (e) => {
@@ -147,9 +136,7 @@
       const target = document.querySelector(id);
       if (target) {
         e.preventDefault();
-        const headerOffset = 84;
-        const top = target.getBoundingClientRect().top + window.scrollY - headerOffset;
-        window.scrollTo({ top, behavior: "smooth" });
+        target.scrollIntoView({ behavior: "smooth", block: "start" });
       }
     });
   });
